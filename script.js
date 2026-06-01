@@ -1,4 +1,6 @@
 let form=document.querySelector(".form-box");
+let cardsWrapper = document.querySelector(".cards-wrapper");
+let currentCardIndex = 0;
 
 //open form and close form by clicking add button
 let addform=document.querySelector(".add-btn");
@@ -89,54 +91,135 @@ submitbtn.addEventListener("click", (e) => {
     let categorRadio = document.querySelectorAll('input[name="category"]');
     categorRadio.forEach(radio => radio.checked = false);
     form.style.display = "none";
+    
+    // Refresh cards after adding new note
+    currentCardIndex = 0;
+    cardsWrapper.innerHTML = "";
+    addcards();
+    displayCard(0);
 
 });
 
 
 function addcards(){
-    let alltasks = JSON.parse(localStorage.getItem("notes")) 
-    alltasks.forEach(note => {
+    let alltasks = JSON.parse(localStorage.getItem("notes"));
+    
+    if (!alltasks || alltasks.length === 0) {
+        cardsWrapper.innerHTML = "<p style='text-align: center; padding: 20px;'>No notes yet. Add one to get started!</p>";
+        return;
+    }
+    
+    alltasks.forEach((note, index) => {
         const card = document.createElement("div");
-card.classList.add("card");
+        card.classList.add("card");
+        card.dataset.index = index;
+        card.style.display = index === 0 ? "block" : "none";
 
-const top = document.createElement("div");
-top.classList.add("top");
+        const top = document.createElement("div");
+        top.classList.add("top");
 
-const img = document.createElement("img");
-img.src = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500";
-img.alt = "profile";
+        const img = document.createElement("img");
+        img.src = note.img;
+        img.alt = "profile";
 
-const info = document.createElement("div");
+        const info = document.createElement("div");
 
-const h2 = document.createElement("h2");
-h2.innerText = "Fatima Uma";
+        const h2 = document.createElement("h2");
+        h2.innerText = note.name;
 
-const p1 = document.createElement("p");
-p1.innerText = "Home Town";
+        const p1 = document.createElement("p");
+        p1.innerText = "Home Town";
 
-const p2 = document.createElement("p");
-p2.innerText = "Bookings";
+        const p2 = document.createElement("p");
+        p2.innerText = "Purpose";
 
-info.append(h2, p1, p2);
+        info.append(h2, p1, p2);
 
-const rightInfo = document.createElement("div");
-rightInfo.classList.add("right-info");
+        const rightInfo = document.createElement("div");
+        rightInfo.classList.add("right-info");
 
-const p3 = document.createElement("p");
-p3.innerText = "Singapore";
+        const p3 = document.createElement("p");
+        p3.innerText = note.town;
 
-const p4 = document.createElement("p");
-p4.innerText = "3 Times";
+        const p4 = document.createElement("p");
+        p4.innerText = note.purpose;
 
-rightInfo.append(p3, p4);
+        rightInfo.append(p3, p4);
 
-top.append(img, info, rightInfo);
+        top.append(img, info, rightInfo);
 
-card.append(top);
+        const actions = document.createElement("div");
+        actions.classList.add("actions");
 
-document.querySelector(".cards").append(card);
+        const callBtn = document.createElement("button");
+        callBtn.classList.add("call-btn");
+        callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Call';
+
+        const msgBtn = document.createElement("button");
+        msgBtn.classList.add("msg-btn");
+        msgBtn.innerText = "Message";
+
+        actions.append(callBtn, msgBtn);
+
+        // Add priority color indicator
+        const priorityDiv = document.createElement("div");
+        priorityDiv.style.marginTop = "15px";
+        priorityDiv.style.padding = "10px";
+        priorityDiv.style.borderRadius = "10px";
+        priorityDiv.style.textAlign = "center";
+        priorityDiv.style.fontWeight = "bold";
+        
+        const categoryColors = {
+            "Emergency": "#ff0000",
+            "Important": "#ffd700",
+            "Urgent": "#8b00ff",
+            "No Rush": "#808080"
+        };
+        
+        priorityDiv.style.backgroundColor = categoryColors[note.category] || "#ccc";
+        priorityDiv.style.color = (note.category === "Important") ? "black" : "white";
+        priorityDiv.innerText = note.category;
+
+        card.append(top, actions, priorityDiv);
+        cardsWrapper.append(card);
     });
 }
 
+function displayCard(index) {
+    let cards = document.querySelectorAll(".card");
+    
+    if (cards.length === 0) return;
+    
+    // Ensure index wraps around
+    if (index >= cards.length) {
+        currentCardIndex = 0;
+    } else if (index < 0) {
+        currentCardIndex = cards.length - 1;
+    } else {
+        currentCardIndex = index;
+    }
+    
+    cards.forEach(card => {
+        card.style.display = "none";
+    });
+    
+    cards[currentCardIndex].style.display = "block";
+}
 
+// Arrow button navigation
+let prevBtn = document.querySelector(".prev-btn");
+let nextBtn = document.querySelector(".next-btn");
 
+prevBtn.addEventListener("click", () => {
+    displayCard(currentCardIndex - 1);
+});
+
+nextBtn.addEventListener("click", () => {
+    displayCard(currentCardIndex + 1);
+});
+
+// Initialize cards on page load
+window.addEventListener("DOMContentLoaded", () => {
+    addcards();
+    displayCard(0);
+});
