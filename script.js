@@ -1,6 +1,8 @@
 let form=document.querySelector(".form-box");
 let cardsWrapper = document.querySelector(".cards-wrapper");
 let currentCardIndex = 0;
+let filteredCards = [];
+let filterCategory = null;
 
 //open form and close form by clicking add button
 let addform=document.querySelector(".add-btn");
@@ -94,6 +96,7 @@ submitbtn.addEventListener("click", (e) => {
     
     // Refresh cards after adding new note
     currentCardIndex = 0;
+    filterCategory = null;
     cardsWrapper.innerHTML = "";
     addcards();
     displayCard(0);
@@ -106,10 +109,23 @@ function addcards(){
     
     if (!alltasks || alltasks.length === 0) {
         cardsWrapper.innerHTML = "<p style='text-align: center; padding: 20px;'>No notes yet. Add one to get started!</p>";
+        filteredCards = [];
         return;
     }
     
-    alltasks.forEach((note, index) => {
+    // Filter cards based on selected category
+    if (filterCategory) {
+        filteredCards = alltasks.filter(note => note.category === filterCategory);
+    } else {
+        filteredCards = alltasks;
+    }
+    
+    if (filteredCards.length === 0) {
+        cardsWrapper.innerHTML = "<p style='text-align: center; padding: 20px;'>No notes in this category.</p>";
+        return;
+    }
+    
+    filteredCards.forEach((note, index) => {
         const card = document.createElement("div");
         card.classList.add("card");
         card.dataset.index = index;
@@ -121,6 +137,9 @@ function addcards(){
         const img = document.createElement("img");
         img.src = note.img;
         img.alt = "profile";
+        img.onerror = function() {
+            this.src = "https://via.placeholder.com/70?text=No+Image";
+        };
 
         const info = document.createElement("div");
 
@@ -216,6 +235,27 @@ prevBtn.addEventListener("click", () => {
 
 nextBtn.addEventListener("click", () => {
     displayCard(currentCardIndex + 1);
+});
+
+// Color dot filtering
+const categoryMap = {
+    "emergency": "Emergency",
+    "important": "Important",
+    "urgent": "Urgent",
+    "norush": "No Rush"
+};
+
+document.querySelectorAll(".dot").forEach(dot => {
+    dot.addEventListener("click", (e) => {
+        const dotClass = Array.from(e.target.classList).find(cls => cls !== "dot");
+        const selectedCategory = categoryMap[dotClass];
+        
+        filterCategory = selectedCategory;
+        currentCardIndex = 0;
+        cardsWrapper.innerHTML = "";
+        addcards();
+        displayCard(0);
+    });
 });
 
 // Initialize cards on page load
