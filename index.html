@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call App</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <!-- Overlay -->
+    <div class="overlay"></div>
+
+    <div class="container">
+
+        <!-- Left Buttons -->
+        <div class="controls">
+
+            <button class="icon-btn add-btn">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+
+            <button class="icon-btn">
+                <i class="fa-solid fa-arrow-up"></i>
+            </button>
+
+            <button class="icon-btn">
+                <i class="fa-solid fa-arrow-down"></i>
+            </button>
+
+        </div>
+
+        <!-- Main Card -->
+        <div class="card">
+
+            <div class="top">
+
+                <img
+                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500"
+                alt="profile">
+
+                <div>
+                    <h2>Fatima Uma</h2>
+                    <p>Home Town</p>
+                    <p>Bookings</p>
+                </div>
+
+                <div class="right-info">
+                    <p>Singapore</p>
+                    <p>3 Times</p>
+                </div>
+
+            </div>
+
+            <div class="actions">
+
+                <button class="call-btn">
+                    <i class="fa-solid fa-phone"></i>
+                    Call
+                </button>
+
+                <button class="msg-btn">
+                    Message
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- Color Dots -->
+        <div class="colors">
+
+            <span class="dot emergency"></span>
+            <span class="dot important"></span>
+            <span class="dot urgent"></span>
+            <span class="dot norush"></span>
+
+        </div>
+
+    </div>
+
+    <!-- Hidden Form -->
+
+    <div class="form-box">
+
+        <h2>New Call</h2>
+
+        <form>
+
+            <input class="img" required type="text" placeholder="Image URL">
+
+            <input class="name" required type="text" placeholder="Full Name">
+
+            <input class="town" required type="text" placeholder="Home Town">
+
+            <input class="purpose" required type="text" placeholder="Purpose">
+
+            <div class="radio-group" required>
+
+                <label>
+                    <input type="radio" name="category">
+                    Emergency
+                </label>
+
+                <label>
+                    <input type="radio" name="category">
+                    Important
+                </label>
+
+                <label>
+                    <input type="radio" name="category">
+                    Urgent
+                </label>
+
+                <label>
+                    <input type="radio" name="category">
+                    No Rush
+                </label>
+
+            </div>
+
+            <button class="create-btn" type="submit">
+                Create Note
+            </button>
+
+        </form>
+
+        <button class="close-btn">
+            Close
+        </button>
+
+    </div>
+<script src="script.js"></script>
+</body>
+</html>
