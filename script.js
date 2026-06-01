@@ -258,8 +258,6 @@ document.querySelectorAll(".dot").forEach(dot => {
     });
 });
 
-// Initialize cards on page load
-window.addEventListener("DOMContentLoaded", () => {
-    addcards();
-    displayCard(0);
-});
+// Initialize cards on page load - call directly since script is at end of HTML
+addcards();
+displayCard(0);
