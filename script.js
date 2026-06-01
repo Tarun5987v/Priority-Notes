@@ -7,8 +7,8 @@ let filterCategory = null;
 //open form and close form by clicking add button
 let addform=document.querySelector(".add-btn");
 addform.addEventListener("click",()=>{
-   if(form.style.display!=="initial"){
-     form.style.display="initial";
+   if(form.style.display!=="block"){
+     form.style.display="block";
 }else{ form.style.display="none";}
 });
 
@@ -134,10 +134,14 @@ function addcards(){
         const top = document.createElement("div");
         top.classList.add("top");
 
-        const img = document.createElement("img");
-        img.src = note.img;
-        img.alt = "profile";
-        img.onerror = function() {
+        const imgElement = document.createElement("img");
+        imgElement.src = note.img;
+        imgElement.alt = "profile";
+        imgElement.style.width = "70px";
+        imgElement.style.height = "70px";
+        imgElement.style.borderRadius = "50%";
+        imgElement.style.objectFit = "cover";
+        imgElement.onerror = function() {
             this.src = "https://via.placeholder.com/70?text=No+Image";
         };
 
@@ -165,7 +169,7 @@ function addcards(){
 
         rightInfo.append(p3, p4);
 
-        top.append(img, info, rightInfo);
+        top.append(imgElement, info, rightInfo);
 
         const actions = document.createElement("div");
         actions.classList.add("actions");
@@ -229,13 +233,17 @@ function displayCard(index) {
 let prevBtn = document.querySelector(".prev-btn");
 let nextBtn = document.querySelector(".next-btn");
 
-prevBtn.addEventListener("click", () => {
-    displayCard(currentCardIndex - 1);
-});
+if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+        displayCard(currentCardIndex - 1);
+    });
+}
 
-nextBtn.addEventListener("click", () => {
-    displayCard(currentCardIndex + 1);
-});
+if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+        displayCard(currentCardIndex + 1);
+    });
+}
 
 // Color dot filtering
 const categoryMap = {
@@ -258,6 +266,10 @@ document.querySelectorAll(".dot").forEach(dot => {
     });
 });
 
-// Initialize cards on page load - call directly since script is at end of HTML
-addcards();
-displayCard(0);
+// Initialize cards after a small delay to ensure DOM is ready
+try {
+    addcards();
+    displayCard(0);
+} catch (error) {
+    console.log("No notes to display yet");
+}
