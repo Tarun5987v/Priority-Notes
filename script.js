@@ -96,6 +96,84 @@ submitBtn.addEventListener("click", (e) => {
     renderCards();
 });
 
+// Create card HTML for a note
+function createCardElement(note, index) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.display = index === 0 ? "block" : "none";
+
+    const top = document.createElement("div");
+    top.className = "top";
+
+    const img = document.createElement("img");
+    img.src = note.img;
+    img.alt = "profile";
+    img.style.width = "70px";
+    img.style.height = "70px";
+    img.style.borderRadius = "50%";
+    img.style.objectFit = "cover";
+    
+    // Prevent infinite error loop - only set onerror once
+    let errorHandled = false;
+    img.addEventListener("error", function(e) {
+        if (!errorHandled) {
+            errorHandled = true;
+            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23ddd' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' font-size='12' text-anchor='middle' dy='.3em' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+        }
+    }, { once: true });
+
+    const info = document.createElement("div");
+    const h2 = document.createElement("h2");
+    h2.innerText = note.name;
+    const p1 = document.createElement("p");
+    p1.innerText = "Home Town";
+    const p2 = document.createElement("p");
+    p2.innerText = "Purpose";
+    info.append(h2, p1, p2);
+
+    const rightInfo = document.createElement("div");
+    rightInfo.className = "right-info";
+    const p3 = document.createElement("p");
+    p3.innerText = note.town;
+    const p4 = document.createElement("p");
+    p4.innerText = note.purpose;
+    rightInfo.append(p3, p4);
+
+    top.append(img, info, rightInfo);
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    const callBtn = document.createElement("button");
+    callBtn.className = "call-btn";
+    callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Call';
+    const msgBtn = document.createElement("button");
+    msgBtn.className = "msg-btn";
+    msgBtn.innerText = "Message";
+    actions.append(callBtn, msgBtn);
+
+    // Priority indicator
+    const priority = document.createElement("div");
+    priority.style.marginTop = "15px";
+    priority.style.padding = "10px";
+    priority.style.borderRadius = "10px";
+    priority.style.textAlign = "center";
+    priority.style.fontWeight = "bold";
+
+    const colors = {
+        "Emergency": "#ff0000",
+        "Important": "#ffd700",
+        "Urgent": "#8b00ff",
+        "No Rush": "#808080"
+    };
+
+    priority.style.backgroundColor = colors[note.category] || "#ccc";
+    priority.style.color = note.category === "Important" ? "black" : "white";
+    priority.innerText = note.category;
+
+    card.append(top, actions, priority);
+    return card;
+}
+
 // Render cards from localStorage
 function renderCards() {
     cardsWrapper.innerHTML = "";
@@ -110,73 +188,7 @@ function renderCards() {
     allCards = notes;
 
     notes.forEach((note, index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.display = index === 0 ? "block" : "none";
-
-        const top = document.createElement("div");
-        top.className = "top";
-
-        const img = document.createElement("img");
-        img.src = note.img;
-        img.alt = "profile";
-        img.style.width = "70px";
-        img.style.height = "70px";
-        img.style.borderRadius = "50%";
-        img.style.objectFit = "cover";
-        img.onerror = function() {
-            this.src = "https://via.placeholder.com/70?text=No+Image";
-        };
-
-        const info = document.createElement("div");
-        const h2 = document.createElement("h2");
-        h2.innerText = note.name;
-        const p1 = document.createElement("p");
-        p1.innerText = "Home Town";
-        const p2 = document.createElement("p");
-        p2.innerText = "Purpose";
-        info.append(h2, p1, p2);
-
-        const rightInfo = document.createElement("div");
-        rightInfo.className = "right-info";
-        const p3 = document.createElement("p");
-        p3.innerText = note.town;
-        const p4 = document.createElement("p");
-        p4.innerText = note.purpose;
-        rightInfo.append(p3, p4);
-
-        top.append(img, info, rightInfo);
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        const callBtn = document.createElement("button");
-        callBtn.className = "call-btn";
-        callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Call';
-        const msgBtn = document.createElement("button");
-        msgBtn.className = "msg-btn";
-        msgBtn.innerText = "Message";
-        actions.append(callBtn, msgBtn);
-
-        // Priority indicator
-        const priority = document.createElement("div");
-        priority.style.marginTop = "15px";
-        priority.style.padding = "10px";
-        priority.style.borderRadius = "10px";
-        priority.style.textAlign = "center";
-        priority.style.fontWeight = "bold";
-
-        const colors = {
-            "Emergency": "#ff0000",
-            "Important": "#ffd700",
-            "Urgent": "#8b00ff",
-            "No Rush": "#808080"
-        };
-
-        priority.style.backgroundColor = colors[note.category] || "#ccc";
-        priority.style.color = note.category === "Important" ? "black" : "white";
-        priority.innerText = note.category;
-
-        card.append(top, actions, priority);
+        const card = createCardElement(note, index);
         cardsWrapper.append(card);
     });
 }
@@ -235,72 +247,7 @@ document.querySelectorAll(".dot").forEach(dot => {
 
         allCards = filtered;
         filtered.forEach((note, index) => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.style.display = index === 0 ? "block" : "none";
-
-            const top = document.createElement("div");
-            top.className = "top";
-
-            const img = document.createElement("img");
-            img.src = note.img;
-            img.alt = "profile";
-            img.style.width = "70px";
-            img.style.height = "70px";
-            img.style.borderRadius = "50%";
-            img.style.objectFit = "cover";
-            img.onerror = function() {
-                this.src = "https://via.placeholder.com/70?text=No+Image";
-            };
-
-            const info = document.createElement("div");
-            const h2 = document.createElement("h2");
-            h2.innerText = note.name;
-            const p1 = document.createElement("p");
-            p1.innerText = "Home Town";
-            const p2 = document.createElement("p");
-            p2.innerText = "Purpose";
-            info.append(h2, p1, p2);
-
-            const rightInfo = document.createElement("div");
-            rightInfo.className = "right-info";
-            const p3 = document.createElement("p");
-            p3.innerText = note.town;
-            const p4 = document.createElement("p");
-            p4.innerText = note.purpose;
-            rightInfo.append(p3, p4);
-
-            top.append(img, info, rightInfo);
-
-            const actions = document.createElement("div");
-            actions.className = "actions";
-            const callBtn = document.createElement("button");
-            callBtn.className = "call-btn";
-            callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Call';
-            const msgBtn = document.createElement("button");
-            msgBtn.className = "msg-btn";
-            msgBtn.innerText = "Message";
-            actions.append(callBtn, msgBtn);
-
-            const priority = document.createElement("div");
-            priority.style.marginTop = "15px";
-            priority.style.padding = "10px";
-            priority.style.borderRadius = "10px";
-            priority.style.textAlign = "center";
-            priority.style.fontWeight = "bold";
-
-            const colors = {
-                "Emergency": "#ff0000",
-                "Important": "#ffd700",
-                "Urgent": "#8b00ff",
-                "No Rush": "#808080"
-            };
-
-            priority.style.backgroundColor = colors[note.category] || "#ccc";
-            priority.style.color = note.category === "Important" ? "black" : "white";
-            priority.innerText = note.category;
-
-            card.append(top, actions, priority);
+            const card = createCardElement(note, index);
             cardsWrapper.append(card);
         });
 
