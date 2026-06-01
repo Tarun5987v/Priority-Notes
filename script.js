@@ -1,249 +1,213 @@
-let form=document.querySelector(".form-box");
+// Get all DOM elements
+let form = document.querySelector(".form-box");
 let cardsWrapper = document.querySelector(".cards-wrapper");
+let addBtn = document.querySelector(".add-btn");
+let closeBtn = document.querySelector(".close-btn");
+let submitBtn = document.querySelector(".create-btn");
+let prevBtn = document.querySelector(".prev-btn");
+let nextBtn = document.querySelector(".next-btn");
+
+// Form inputs
+let imgInput = document.querySelector(".img");
+let nameInput = document.querySelector(".name");
+let townInput = document.querySelector(".town");
+let purposeInput = document.querySelector(".purpose");
+let categoryRadios = document.querySelectorAll('input[name="category"]');
+
+// State variables
 let currentCardIndex = 0;
-let filteredCards = [];
-let filterCategory = null;
+let allCards = [];
 
-//open form and close form by clicking add button
-let addform=document.querySelector(".add-btn");
-addform.addEventListener("click",()=>{
-   if(form.style.display!=="block"){
-     form.style.display="block";
-}else{ form.style.display="none";}
+// Toggle form visibility
+addBtn.addEventListener("click", () => {
+    form.style.display = form.style.display === "block" ? "none" : "block";
 });
 
-
-//close form by clicking close button
-let closebtn=document.querySelector(".close-btn");
-closebtn.addEventListener("click",()=>{
-    form.style.display="none";
+closeBtn.addEventListener("click", () => {
+    form.style.display = "none";
 });
 
+// Save to localStorage
+function saveToLocalStorage(note) {
+    let notes = JSON.parse(localStorage.getItem("notes")) || [];
+    notes.push(note);
+    localStorage.setItem("notes", JSON.stringify(notes));
+}
 
-
-// all form inputs selection
-let img=document.querySelector(".img");
-let name=document.querySelector(".name");
-let town=document.querySelector(".town");
-let purpose=document.querySelector(".purpose");
-let submitbtn=document.querySelector(".create-btn");
-let categoryRadio=document.querySelectorAll('input[name="category"]');
-
-
-function savetoLocalStorage(obj){
-    let existingData = JSON.parse(localStorage.getItem("notes")) || [];
-    existingData.push(obj);
-    localStorage.setItem("notes", JSON.stringify(existingData));
-} 
-
-
-
-//validation for form inputs
-submitbtn.addEventListener("click", (e) => {
+// Form submission
+submitBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    console.log("submit button clicked");
+
     const nameRegex = /^[A-Za-z ]{2,50}$/;
     const townRegex = /^[A-Za-z\s-]{2,50}$/;
     const purposeRegex = /^[A-Za-z0-9\s.,!?()-]{3,100}$/;
     const urlRegex = /^https?:\/\/.+/;
 
-
-    if (!nameRegex.test(name.value)) {
-        alert("Invalid name");
+    // Validation
+    if (!nameRegex.test(nameInput.value)) {
+        alert("Invalid name - must be 2-50 letters");
         return;
     }
-
-    if (!townRegex.test(town.value)) {
+    if (!townRegex.test(townInput.value)) {
         alert("Invalid town");
         return;
     }
-
-    if (!purposeRegex.test(purpose.value)) {
+    if (!purposeRegex.test(purposeInput.value)) {
         alert("Invalid purpose");
         return;
     }
-
-    if (!urlRegex.test(img.value)) {
+    if (!urlRegex.test(imgInput.value)) {
         alert("Invalid image URL");
         return;
     }
 
-    let selectedCategory = false;
-    categoryRadio.forEach(radio => {
+    let selectedCategory = null;
+    for (let radio of categoryRadios) {
         if (radio.checked) {
-            selectedCategory = true;
+            selectedCategory = radio.value;
+            break;
         }
-    });
+    }
 
     if (!selectedCategory) {
         alert("Please select a category");
         return;
     }
 
-    savetoLocalStorage({
-        img:img.value,
-        name:name.value,
-        town:town.value,
-        purpose:purpose.value,
-        category: Array.from(categoryRadio).find(radio => radio.checked).value
+    // Save to localStorage
+    saveToLocalStorage({
+        img: imgInput.value,
+        name: nameInput.value,
+        town: townInput.value,
+        purpose: purposeInput.value,
+        category: selectedCategory
     });
 
-    alert("Form submitted successfully!");
-    form.querySelectorAll('input').forEach(input => input.value = '');
-    let categorRadio = document.querySelectorAll('input[name="category"]');
-    categorRadio.forEach(radio => radio.checked = false);
+    // Clear form
+    imgInput.value = "";
+    nameInput.value = "";
+    townInput.value = "";
+    purposeInput.value = "";
+    categoryRadios.forEach(r => r.checked = false);
     form.style.display = "none";
-    
-    // Refresh cards after adding new note
-    currentCardIndex = 0;
-    filterCategory = null;
-    cardsWrapper.innerHTML = "";
-    addcards();
-    displayCard(0);
 
+    // Refresh display
+    currentCardIndex = 0;
+    renderCards();
 });
 
+// Render cards from localStorage
+function renderCards() {
+    cardsWrapper.innerHTML = "";
+    let notes = JSON.parse(localStorage.getItem("notes")) || [];
 
-function addcards(){
-    let alltasks = JSON.parse(localStorage.getItem("notes"));
-    
-    if (!alltasks || alltasks.length === 0) {
-        cardsWrapper.innerHTML = "<p style='text-align: center; padding: 20px;'>No notes yet. Add one to get started!</p>";
-        filteredCards = [];
+    if (notes.length === 0) {
+        cardsWrapper.innerHTML = "<p style='text-align: center; padding: 20px; width: 100%;'>No notes yet. Click + to add one!</p>";
+        allCards = [];
         return;
     }
-    
-    // Filter cards based on selected category
-    if (filterCategory) {
-        filteredCards = alltasks.filter(note => note.category === filterCategory);
-    } else {
-        filteredCards = alltasks;
-    }
-    
-    if (filteredCards.length === 0) {
-        cardsWrapper.innerHTML = "<p style='text-align: center; padding: 20px;'>No notes in this category.</p>";
-        return;
-    }
-    
-    filteredCards.forEach((note, index) => {
+
+    allCards = notes;
+
+    notes.forEach((note, index) => {
         const card = document.createElement("div");
-        card.classList.add("card");
-        card.dataset.index = index;
+        card.className = "card";
         card.style.display = index === 0 ? "block" : "none";
 
         const top = document.createElement("div");
-        top.classList.add("top");
+        top.className = "top";
 
-        const imgElement = document.createElement("img");
-        imgElement.src = note.img;
-        imgElement.alt = "profile";
-        imgElement.style.width = "70px";
-        imgElement.style.height = "70px";
-        imgElement.style.borderRadius = "50%";
-        imgElement.style.objectFit = "cover";
-        imgElement.onerror = function() {
+        const img = document.createElement("img");
+        img.src = note.img;
+        img.alt = "profile";
+        img.style.width = "70px";
+        img.style.height = "70px";
+        img.style.borderRadius = "50%";
+        img.style.objectFit = "cover";
+        img.onerror = function() {
             this.src = "https://via.placeholder.com/70?text=No+Image";
         };
 
         const info = document.createElement("div");
-
         const h2 = document.createElement("h2");
         h2.innerText = note.name;
-
         const p1 = document.createElement("p");
         p1.innerText = "Home Town";
-
         const p2 = document.createElement("p");
         p2.innerText = "Purpose";
-
         info.append(h2, p1, p2);
 
         const rightInfo = document.createElement("div");
-        rightInfo.classList.add("right-info");
-
+        rightInfo.className = "right-info";
         const p3 = document.createElement("p");
         p3.innerText = note.town;
-
         const p4 = document.createElement("p");
         p4.innerText = note.purpose;
-
         rightInfo.append(p3, p4);
 
-        top.append(imgElement, info, rightInfo);
+        top.append(img, info, rightInfo);
 
         const actions = document.createElement("div");
-        actions.classList.add("actions");
-
+        actions.className = "actions";
         const callBtn = document.createElement("button");
-        callBtn.classList.add("call-btn");
+        callBtn.className = "call-btn";
         callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Call';
-
         const msgBtn = document.createElement("button");
-        msgBtn.classList.add("msg-btn");
+        msgBtn.className = "msg-btn";
         msgBtn.innerText = "Message";
-
         actions.append(callBtn, msgBtn);
 
-        // Add priority color indicator
-        const priorityDiv = document.createElement("div");
-        priorityDiv.style.marginTop = "15px";
-        priorityDiv.style.padding = "10px";
-        priorityDiv.style.borderRadius = "10px";
-        priorityDiv.style.textAlign = "center";
-        priorityDiv.style.fontWeight = "bold";
-        
-        const categoryColors = {
+        // Priority indicator
+        const priority = document.createElement("div");
+        priority.style.marginTop = "15px";
+        priority.style.padding = "10px";
+        priority.style.borderRadius = "10px";
+        priority.style.textAlign = "center";
+        priority.style.fontWeight = "bold";
+
+        const colors = {
             "Emergency": "#ff0000",
             "Important": "#ffd700",
             "Urgent": "#8b00ff",
             "No Rush": "#808080"
         };
-        
-        priorityDiv.style.backgroundColor = categoryColors[note.category] || "#ccc";
-        priorityDiv.style.color = (note.category === "Important") ? "black" : "white";
-        priorityDiv.innerText = note.category;
 
-        card.append(top, actions, priorityDiv);
+        priority.style.backgroundColor = colors[note.category] || "#ccc";
+        priority.style.color = note.category === "Important" ? "black" : "white";
+        priority.innerText = note.category;
+
+        card.append(top, actions, priority);
         cardsWrapper.append(card);
     });
 }
 
+// Display specific card
 function displayCard(index) {
-    let cards = document.querySelectorAll(".card");
-    
-    if (cards.length === 0) return;
-    
-    // Ensure index wraps around
-    if (index >= cards.length) {
+    if (allCards.length === 0) return;
+
+    if (index >= allCards.length) {
         currentCardIndex = 0;
     } else if (index < 0) {
-        currentCardIndex = cards.length - 1;
+        currentCardIndex = allCards.length - 1;
     } else {
         currentCardIndex = index;
     }
-    
-    cards.forEach(card => {
-        card.style.display = "none";
-    });
-    
-    cards[currentCardIndex].style.display = "block";
+
+    let cards = document.querySelectorAll(".card");
+    cards.forEach(card => card.style.display = "none");
+    if (cards[currentCardIndex]) {
+        cards[currentCardIndex].style.display = "block";
+    }
 }
 
-// Arrow button navigation
-let prevBtn = document.querySelector(".prev-btn");
-let nextBtn = document.querySelector(".next-btn");
+// Navigation
+prevBtn.addEventListener("click", () => {
+    displayCard(currentCardIndex - 1);
+});
 
-if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-        displayCard(currentCardIndex - 1);
-    });
-}
-
-if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-        displayCard(currentCardIndex + 1);
-    });
-}
+nextBtn.addEventListener("click", () => {
+    displayCard(currentCardIndex + 1);
+});
 
 // Color dot filtering
 const categoryMap = {
@@ -257,19 +221,92 @@ document.querySelectorAll(".dot").forEach(dot => {
     dot.addEventListener("click", (e) => {
         const dotClass = Array.from(e.target.classList).find(cls => cls !== "dot");
         const selectedCategory = categoryMap[dotClass];
-        
-        filterCategory = selectedCategory;
-        currentCardIndex = 0;
+
+        let notes = JSON.parse(localStorage.getItem("notes")) || [];
+        let filtered = notes.filter(n => n.category === selectedCategory);
+
         cardsWrapper.innerHTML = "";
-        addcards();
-        displayCard(0);
+
+        if (filtered.length === 0) {
+            cardsWrapper.innerHTML = `<p style='text-align: center; padding: 20px; width: 100%;'>No ${selectedCategory} notes</p>`;
+            allCards = [];
+            return;
+        }
+
+        allCards = filtered;
+        filtered.forEach((note, index) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.style.display = index === 0 ? "block" : "none";
+
+            const top = document.createElement("div");
+            top.className = "top";
+
+            const img = document.createElement("img");
+            img.src = note.img;
+            img.alt = "profile";
+            img.style.width = "70px";
+            img.style.height = "70px";
+            img.style.borderRadius = "50%";
+            img.style.objectFit = "cover";
+            img.onerror = function() {
+                this.src = "https://via.placeholder.com/70?text=No+Image";
+            };
+
+            const info = document.createElement("div");
+            const h2 = document.createElement("h2");
+            h2.innerText = note.name;
+            const p1 = document.createElement("p");
+            p1.innerText = "Home Town";
+            const p2 = document.createElement("p");
+            p2.innerText = "Purpose";
+            info.append(h2, p1, p2);
+
+            const rightInfo = document.createElement("div");
+            rightInfo.className = "right-info";
+            const p3 = document.createElement("p");
+            p3.innerText = note.town;
+            const p4 = document.createElement("p");
+            p4.innerText = note.purpose;
+            rightInfo.append(p3, p4);
+
+            top.append(img, info, rightInfo);
+
+            const actions = document.createElement("div");
+            actions.className = "actions";
+            const callBtn = document.createElement("button");
+            callBtn.className = "call-btn";
+            callBtn.innerHTML = '<i class="fa-solid fa-phone"></i> Call';
+            const msgBtn = document.createElement("button");
+            msgBtn.className = "msg-btn";
+            msgBtn.innerText = "Message";
+            actions.append(callBtn, msgBtn);
+
+            const priority = document.createElement("div");
+            priority.style.marginTop = "15px";
+            priority.style.padding = "10px";
+            priority.style.borderRadius = "10px";
+            priority.style.textAlign = "center";
+            priority.style.fontWeight = "bold";
+
+            const colors = {
+                "Emergency": "#ff0000",
+                "Important": "#ffd700",
+                "Urgent": "#8b00ff",
+                "No Rush": "#808080"
+            };
+
+            priority.style.backgroundColor = colors[note.category] || "#ccc";
+            priority.style.color = note.category === "Important" ? "black" : "white";
+            priority.innerText = note.category;
+
+            card.append(top, actions, priority);
+            cardsWrapper.append(card);
+        });
+
+        currentCardIndex = 0;
     });
 });
 
-// Initialize cards after a small delay to ensure DOM is ready
-try {
-    addcards();
-    displayCard(0);
-} catch (error) {
-    console.log("No notes to display yet");
-}
+// Initialize on page load
+renderCards();
