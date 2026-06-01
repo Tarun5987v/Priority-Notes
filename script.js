@@ -128,13 +128,13 @@ function createCardElement(note, index) {
     const p1 = document.createElement("p");
     p1.innerText = "Home Town";
     const p2 = document.createElement("p");
-    p2.innerText = "Purpose";
+    p2.innerText = note.town;
     info.append(h2, p1, p2);
 
     const rightInfo = document.createElement("div");
     rightInfo.className = "right-info";
     const p3 = document.createElement("p");
-    p3.innerText = note.town;
+    p3.innerText = "Purpose";
     const p4 = document.createElement("p");
     p4.innerText = note.purpose;
     rightInfo.append(p3, p4);
